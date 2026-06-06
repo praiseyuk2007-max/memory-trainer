@@ -3,13 +3,15 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Memory Trainer AI API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: memory
+    description: Memory training session operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,168 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /memory/sessions:
+    get:
+      operationId: listSessions
+      tags: [memory]
+      summary: List all past sessions
+      responses:
+        "200":
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+
+  /memory/sessions/due:
+    get:
+      operationId: listDueSessions
+      tags: [memory]
+      summary: List sessions due for spaced repetition review
+      responses:
+        "200":
+          description: Sessions due for review
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+
+  /memory/sessions/{id}:
+    get:
+      operationId: getSession
+      tags: [memory]
+      summary: Get a session by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteSession
+      tags: [memory]
+      summary: Delete a session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /memory/generate-content:
+    post:
+      operationId: generateContent
+      tags: [memory]
+      summary: Generate educational content for a topic (SSE stream)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateContentInput"
+      responses:
+        "200":
+          description: SSE stream of content chunks
+          content:
+            text/event-stream: {}
+
+  /memory/generate-questions:
+    post:
+      operationId: generateQuestions
+      tags: [memory]
+      summary: Generate recall questions for a topic and difficulty
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateQuestionsInput"
+      responses:
+        "200":
+          description: Generated questions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionsResponse"
+
+  /memory/evaluate:
+    post:
+      operationId: evaluateAnswers
+      tags: [memory]
+      summary: Evaluate user answers and return feedback + score
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluateInput"
+      responses:
+        "200":
+          description: Evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationResult"
+
+  /memory/save-session:
+    post:
+      operationId: saveSession
+      tags: [memory]
+      summary: Save a completed session with score for spaced repetition
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInput"
+      responses:
+        "201":
+          description: Saved session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /memory/stats:
+    get:
+      operationId: getStats
+      tags: [memory]
+      summary: Get overall learning stats
+      responses:
+        "200":
+          description: Learning stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +198,172 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: integer
+        topic:
+          type: string
+        score:
+          type: integer
+        difficulty:
+          type: string
+        writtenAnswer:
+          type: ["string", "null"]
+        feedback:
+          type: ["string", "null"]
+        weakPoints:
+          type: ["string", "null"]
+        nextReviewAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - topic
+        - score
+        - difficulty
+        - nextReviewAt
+        - createdAt
+
+    SessionInput:
+      type: object
+      properties:
+        topic:
+          type: string
+        score:
+          type: integer
+        difficulty:
+          type: string
+        writtenAnswer:
+          type: string
+        feedback:
+          type: string
+        weakPoints:
+          type: string
+      required:
+        - topic
+        - score
+        - difficulty
+
+    GenerateContentInput:
+      type: object
+      properties:
+        topic:
+          type: string
+        difficulty:
+          type: string
+      required:
+        - topic
+        - difficulty
+
+    GenerateQuestionsInput:
+      type: object
+      properties:
+        topic:
+          type: string
+        difficulty:
+          type: string
+        content:
+          type: string
+      required:
+        - topic
+        - difficulty
+        - content
+
+    QuestionsResponse:
+      type: object
+      properties:
+        questions:
+          type: array
+          items:
+            type: string
+      required:
+        - questions
+
+    EvaluateInput:
+      type: object
+      properties:
+        topic:
+          type: string
+        content:
+          type: string
+        questions:
+          type: array
+          items:
+            type: string
+        answers:
+          type: array
+          items:
+            type: string
+        writtenAnswer:
+          type: string
+        difficulty:
+          type: string
+      required:
+        - topic
+        - content
+        - questions
+        - answers
+        - writtenAnswer
+        - difficulty
+
+    EvaluationResult:
+      type: object
+      properties:
+        score:
+          type: integer
+        feedback:
+          type: string
+        weakPoints:
+          type: array
+          items:
+            type: string
+        improvements:
+          type: array
+          items:
+            type: string
+        nextDifficulty:
+          type: string
+        feynmanExplanation:
+          type: string
+      required:
+        - score
+        - feedback
+        - weakPoints
+        - improvements
+        - nextDifficulty
+        - feynmanExplanation
+
+    StatsResponse:
+      type: object
+      properties:
+        totalSessions:
+          type: integer
+        averageScore:
+          type: number
+        topicsStudied:
+          type: integer
+        dueForReview:
+          type: integer
+        recentSessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Session"
+      required:
+        - totalSessions
+        - averageScore
+        - topicsStudied
+        - dueForReview
+        - recentSessions
