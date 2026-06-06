@@ -20,7 +20,7 @@ function getAI() {
   return new GoogleGenAI({ apiKey });
 }
 
-const MODEL = "gemini-2.5-flash-lite";
+const MODEL = "gemini-2.5-flash";
 const MAX_TOKENS = 1024;
 
 // GET /memory/sessions
