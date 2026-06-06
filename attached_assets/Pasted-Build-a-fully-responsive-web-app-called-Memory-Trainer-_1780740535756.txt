@@ -1,0 +1,124 @@
+Build a fully responsive web app called "Memory Trainer AI".
+
+It must work on both mobile (iPhone) and desktop browsers.
+
+This is an AI-powered learning system that trains memory using reading, active recall, writing, and spaced repetition.
+
+────────────────────────────
+
+🎯 CORE PURPOSE
+The app helps users:
+- Improve academic memory (CS, psychology, biology, physics, chemistry, general knowledge)
+- Train active recall and writing-based learning
+- Use spaced repetition for long-term memory
+- Avoid reinforcing intrusive or unwanted memory loops
+
+────────────────────────────
+
+📱 UI REQUIREMENTS
+- Clean dark theme
+- Mobile-first design but fully responsive for desktop
+- Simple game-like interface
+- Large buttons for mobile
+- One task per screen feel
+- Smooth transitions between steps
+
+────────────────────────────
+
+🎮 APP FLOW (IMPORTANT)
+
+SCREEN 1 — HOME
+- Input box: "Enter topic"
+- Button: "Start Session"
+
+SCREEN 2 — READING MODE
+- Show a short educational explanation (5–12 sentences)
+- Structured, simple, like a mini textbook
+- Based on general academic knowledge
+- No hallucinated extreme details
+- If unsure, state "I am not certain"
+
+SCREEN 3 — ACTIVE RECALL
+- Ask 3–5 open-ended questions
+- No multiple choice unless user struggles or requests
+
+SCREEN 4 — WRITING MODE
+- Text box for user to explain concept in own words (1–3 sentences minimum)
+
+SCREEN 5 — FEEDBACK SYSTEM
+After submission:
+- Correct answers briefly
+- Explain concept in simple Feynman style
+- Give score from 0–10
+- Show weak points clearly
+- Suggest improvement
+
+SCREEN 6 — SPACED REPETITION SYSTEM
+- Store weak topics locally in browser storage
+- Schedule review timing:
+  - Score 8–10 → review in 7+ days
+  - Score 5–7 → review in 2–3 days
+  - Score 0–4 → review next session
+
+────────────────────────────
+
+🧠 DIFFICULTY SYSTEM
+
+Default mode: NORMAL
+
+Adaptive rules:
+- High score → increase difficulty slightly (harder questions, less hints)
+- Medium score → keep same level
+- Low score → simplify explanation and optionally add MCQ fallback
+
+────────────────────────────
+
+⚠️ INTRUSIVE MEMORY HANDLING
+
+If user mentions intrusive, unwanted, or emotionally triggering memories:
+- Do NOT analyze or expand it
+- Do NOT ask follow-up questions
+- Label internally as "not relevant memory loop"
+- Immediately redirect to neutral cognitive task:
+  → academic recall questions
+  → simple explanation tasks
+  → basic mental exercises
+
+No emotional reinforcement.
+
+────────────────────────────
+
+📊 ACCURACY RULES
+
+- Use only widely accepted academic knowledge
+- Do not invent facts
+- Keep explanations clear and structured
+- If uncertain, say "I am not certain"
+- Prefer textbook-level understanding
+
+────────────────────────────
+
+⚙️ TECH REQUIREMENTS
+- Use only HTML, CSS, and JavaScript
+- No backend required initially
+- Store progress using browser localStorage
+- Must be lightweight and fast
+- Must work smoothly on mobile devices
+
+────────────────────────────
+
+🎨 EXPERIENCE GOAL
+The app should feel like:
+- A learning game
+- A structured AI tutor
+- A memory training system
+- Not a chatbot
+
+────────────────────────────
+
+🎯 FINAL GOAL
+Help users build:
+- Strong long-term academic memory
+- Reliable recall under pressure
+- Stable attention control
+- Reduced reinforcement of unwanted mental loops
