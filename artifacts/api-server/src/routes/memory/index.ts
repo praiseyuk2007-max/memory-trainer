@@ -20,7 +20,7 @@ function getAI() {
   return new GoogleGenAI({ apiKey });
 }
 
-const MODEL = "gemini-3.1-flash-lite";
+const MODEL = "gemini-2.0-flash-lite";
 const MAX_TOKENS = 1024;
 
 // GET /memory/sessions
@@ -108,7 +108,7 @@ router.delete("/memory/sessions/:id", async (req, res): Promise<void> => {
   res.sendStatus(204);
 });
 
-// POST /memory/generate-content (SSE streaming)
+// POST /memory/generate-content
 router.post("/memory/generate-content", async (req, res): Promise<void> => {
   const parsed = GenerateContentBody.safeParse(req.body);
   if (!parsed.success) {
@@ -130,30 +130,19 @@ Write 6-10 sentences only. Structure: definition → key concepts → real-world
 Use only widely accepted facts. If uncertain about a detail, say "I am not certain".
 Do NOT use bullet points. Write in flowing paragraphs.`;
 
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-
   try {
     const ai = getAI();
-    const stream = await ai.models.generateContentStream({
+    const result = await ai.models.generateContent({
       model: MODEL,
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: { maxOutputTokens: MAX_TOKENS },
     });
-
-    for await (const chunk of stream) {
-      const text = chunk.text;
-      if (text) {
-        res.write(`data: ${JSON.stringify({ content: text })}\n\n`);
-      }
-    }
-    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    const content = result.text ?? "";
+    res.json({ content });
   } catch (err) {
     logger.error({ err }, "Error generating content");
-    res.write(`data: ${JSON.stringify({ error: "Failed to generate content" })}\n\n`);
+    res.status(500).json({ error: "Failed to generate content" });
   }
-  res.end();
 });
 
 // POST /memory/generate-questions
