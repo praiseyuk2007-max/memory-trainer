@@ -292,40 +292,17 @@ function ReadingStep({ topic, difficulty, content, setContent, readingDone, setR
           body: JSON.stringify({ topic, difficulty }),
         });
         
-        if (!response.body) throw new Error("No response body");
+        if (!response.ok) throw new Error("API error");
         
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          if (!isMounted) break;
-          
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-          
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.content) {
-                  setContent((prev: string) => prev + data.content);
-                }
-                if (data.done) {
-                  setReadingDone(true);
-                }
-              } catch (e) {
-                // Ignore parse errors on incomplete chunks
-              }
-            }
-          }
+        const data = await response.json();
+        if (!isMounted) return;
+        if (data.content) {
+          setContent(data.content);
         }
+        setReadingDone(true);
       } catch (err) {
         if (isMounted) {
-          toast({ title: 'Stream Error', description: 'Could not load content completely.', variant: 'destructive' });
+          toast({ title: 'Error', description: 'Could not load content. Please try again.', variant: 'destructive' });
           setReadingDone(true);
         }
       }
