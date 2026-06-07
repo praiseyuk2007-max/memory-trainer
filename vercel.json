@@ -1,6 +1,6 @@
 {
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm run typecheck:libs && pnpm --filter @workspace/memory-trainer run build",
+  "buildCommand": "pnpm -w run typecheck:libs && pnpm --filter @workspace/memory-trainer run build",
   "outputDirectory": "artifacts/memory-trainer/dist/public",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" },
